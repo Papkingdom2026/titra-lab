@@ -286,9 +286,9 @@ export const UserManualPage = () => {
 
               <div className="space-y-1 text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <p className="font-bold text-slate-900">ขั้นตอนปฏิบัติ:</p>
-                <p>1. <b>Trial 1 (ซ้ำที่ 1):</b> จุดยุติสีชมพูระเรื่อที่ <b>24.80 mL</b></p>
-                <p>2. <b>Trial 2 (ซ้ำที่ 2):</b> จุดยุติสีชมพูระเรื่อที่ <b>24.85 mL</b></p>
-                <p>3. <b>Trial 3 (ซ้ำที่ 3):</b> จุดยุติสีชมพูระเรื่อที่ <b>28.50 mL</b></p>
+                <p>1. <b>Trial 1 (ซ้ำที่ 1):</b> จุดยุติสีชมพูระเรื่อที่ <b>2.82 mL</b></p>
+                <p>2. <b>Trial 2 (ซ้ำที่ 2):</b> จุดยุติสีชมพูระเรื่อที่ <b>2.84 mL</b></p>
+                <p>3. <b>Trial 3 (ซ้ำที่ 3):</b> จุดยุติสีชมพูระเรื่อที่ <b>3.56 mL</b></p>
                 <p>4. บันทึกผลครบทั้ง 3 ซ้ำ แล้วคลิกปุ่ม <i>"ไปต่อ Phase 4: การคำนวณ"</i></p>
               </div>
             </div>
@@ -318,11 +318,10 @@ export const UserManualPage = () => {
 
               <div className="space-y-1 text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <p className="font-bold text-slate-900">ขั้นตอนปฏิบัติ:</p>
-                <p>1. <b>ข้อ 1 (เลือก Outlier):</b> สังเกตและเลือก Trial ที่ผิดปกติ หรือระบุว่าไม่พบ</p>
-                <p>2. <b>ข้อ 2 (ปริมาตรเฉลี่ย):</b> คำนวณค่าเฉลี่ย V̄ = <b>24.825 mL</b></p>
-                <p>3. <b>ข้อ 3 (ความเข้มข้นกรด):</b> C₁V₁ = C₂V₂ ➔ กรอก <b>0.0993 M</b></p>
-                <p>4. <b>ข้อ 4 (มวลวิตามินซี):</b> คำนวณปริมาณใน 250 mL ➔ กรอก <b>496 mg (หรือ 0.496 g)</b></p>
-                <p className="text-[11px] text-slate-500 font-normal">*(กดดู 'ผู้ช่วยคำนวณ' เพื่อดูวิธีทำและสูตรคำนวณทีละขั้นตอนได้)*</p>
+                <p>1. <b>ข้อ 1 (เลือก Outlier):</b> เลือก Trial 3 (3.56 mL)</p>
+                <p>2. <b>ข้อ 2 (ปริมาตรเฉลี่ย):</b> V̄ = (2.82 + 2.84)/2 = <b>2.84 mL</b></p>
+                <p>3. <b>ข้อ 3 (ความเข้มข้นกรด):</b> C₁ = (0.1000 × 2.84)/25.00 = <b>0.01136 M</b></p>
+                <p>4. <b>ข้อ 4 (มวลวิตามินซี):</b> คำนวณใน 250 mL ➔ <b>500 mg (หรือ 0.500 g)</b></p>
               </div>
             </div>
 
@@ -351,10 +350,10 @@ export const UserManualPage = () => {
 
               <div className="space-y-1 text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
                 <p className="font-bold text-slate-900">ขั้นตอนปฏิบัติ:</p>
-                <p>1. <b>Claim:</b> เลือก "วิตามินซีต่ำกว่าฉลาก 50%"</p>
-                <p>2. <b>Evidence:</b> เลือก 2 ข้อ (NaOH 0.1000 M เฉลี่ย 24.825 mL และ C1 = 0.0993 M)</p>
-                <p>3. <b>Reasoning:</b> เลือก "จากปฏิกิริยาสะเทิน 1:1 และสูตร C1V1=C2V2"</p>
-                <p>4. คลิกปุ่ม <b>"ยื่นรายงาน CER ปิดคดีประวัติศาสตร์"</b></p>
+                <p>1. <b>Claim:</b> เลือกข้อกล่าวอ้างที่ถูกต้อง</p>
+                <p>2. <b>Evidence:</b> เลือกหลักฐาน NaOH 0.1000 M และ C1 = 0.01136 M</p>
+                <p>3. <b>Reasoning:</b> เลือกเหตุผลทางเคมีนิติวิทยาศาสตร์</p>
+                <p>4. คลิกปุ่ม <b>"ยื่นรายงาน CER สรุปผลการสืบสวน"</b></p>
               </div>
             </div>
 
@@ -364,7 +363,38 @@ export const UserManualPage = () => {
             </div>
           </div>
 
-          {/* Card 6: Phase 6 */}
+          {/* Card 6: Phase 6 - Quiz */}
+          <div className="bg-white border-2 border-sky-300 rounded-2xl p-5 shadow-md flex flex-col justify-between space-y-3 hover:border-sky-500 transition-colors">
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-sky-100 rounded-xl text-sky-700">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold text-sky-600 bg-sky-50 px-2 py-0.5 rounded border border-sky-200 uppercase">Phase 6</span>
+                  <h4 className="font-extrabold text-base text-slate-900">แบบทดสอบ (Quiz 10 ข้อ)</h4>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-600 font-medium">
+                <b>ภารกิจ:</b> ทำแบบทดสอบท้ายบทเรียน 10 ข้อ (ปรนัย 6 ข้อ และอัตนัยคำนวณสั้น 4 ข้อ)
+              </p>
+
+              <div className="space-y-1 text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <p className="font-bold text-slate-900">รายละเอียดแบบทดสอบ:</p>
+                <p>• ข้อ 1-6: ปรนัยเลือกตอบ ก-ง</p>
+                <p>• ข้อ 7-10: อัตนัยคำนวณสั้น (2.84 mL, 50.0 mg, 500 mg, 99.6%)</p>
+                <p>• มีเฉลยพร้อมคำอธิบายหลักการวิทยาศาสตร์ทุกข้อ</p>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs font-bold bg-sky-50 p-2.5 rounded-xl text-sky-800 border border-sky-200">
+              <span className="flex items-center gap-1">🎓 Forensic Scholar</span>
+              <span className="font-mono bg-sky-200 px-2 py-0.5 rounded text-sky-900">+300 XP</span>
+            </div>
+          </div>
+
+          {/* Card 7: Certificate */}
           <div className="bg-white border-2 border-yellow-400 rounded-2xl p-5 shadow-md flex flex-col justify-between space-y-3 hover:border-yellow-500 transition-colors bg-gradient-to-b from-yellow-50/30 to-white">
             <div className="space-y-2.5">
               <div className="flex items-center gap-2.5">
@@ -372,13 +402,13 @@ export const UserManualPage = () => {
                   <Award className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 uppercase">Phase 6</span>
+                  <span className="text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 uppercase">Phase 7</span>
                   <h4 className="font-extrabold text-base text-slate-900">เกียรติบัตร (Certificate)</h4>
                 </div>
               </div>
 
               <p className="text-xs text-slate-600 font-medium">
-                <b>สิ่งที่ได้รับ:</b> การประเมินผลคะแนนดาว 5 ระดับ ⭐⭐⭐⭐⭐ และใบประกาศเกียรติคุณฉบับทางการ
+                <b>สิ่งที่ได้รับ:</b> การประเมินผลคะแนนดาว 5 ระดับ ⭐⭐⭐⭐⭐ รวมผลสอบ และใบประกาศเกียรติคุณ
               </p>
 
               <div className="space-y-1 text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
@@ -390,7 +420,7 @@ export const UserManualPage = () => {
 
             <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-xs font-bold bg-amber-50 p-2.5 rounded-xl text-amber-800 border border-amber-200">
               <span className="flex items-center gap-1">⭐⭐⭐⭐⭐ 5-Star System</span>
-              <span className="font-mono bg-amber-200 px-2 py-0.5 rounded text-amber-900">900+ XP Gold</span>
+              <span className="font-mono bg-amber-200 px-2 py-0.5 rounded text-amber-900">1100+ XP & 9+ ข้อ Gold</span>
             </div>
           </div>
 

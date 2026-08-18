@@ -57,7 +57,7 @@ export const AnalysisWorkstation = () => {
     setIsDropping(true);
     setCurrentVolumeAdded((prev) => {
       const next = parseFloat(((prev || 0) + amount).toFixed(2));
-      return Math.min(50.0, next);
+      return Math.min(10.0, next);
     });
     setTimeout(() => setIsDropping(false), 250);
   };
@@ -72,15 +72,15 @@ export const AnalysisWorkstation = () => {
       setIsAutoDripping(true);
       autoDripIntervalRef.current = setInterval(() => {
         setCurrentVolumeAdded((prev) => {
-          if (prev >= 50.0) {
+          if (prev >= 10.0) {
             clearInterval(autoDripIntervalRef.current);
             setIsAutoDripping(false);
-            return 50.0;
+            return 10.0;
           }
           try { sound.playDrop(); } catch (e) { }
-          return parseFloat((prev + 0.1).toFixed(2));
+          return parseFloat((prev + 0.02).toFixed(2));
         });
-      }, 200);
+      }, 150);
     }
   };
 
@@ -270,15 +270,15 @@ export const AnalysisWorkstation = () => {
             <div className="space-y-1.5 bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
               <div className="flex items-center justify-between text-xs font-semibold text-slate-300">
                 <span className="flex items-center gap-1">
-                  <Sliders className="w-3.5 h-3.5 text-sky-400" /> แถบเลื่อนปรับปริมาตรบิวเรตต์:
+                  <Sliders className="w-3.5 h-3.5 text-sky-400" /> แถบเลื่อนปรับปริมาตรบิวเรตต์ (0 - 10 mL):
                 </span>
-                <span className="font-mono text-sky-400">{currentVolumeAdded.toFixed(2)} / 50.00 mL</span>
+                <span className="font-mono text-sky-400 font-bold">{currentVolumeAdded.toFixed(2)} / 10.00 mL</span>
               </div>
               <input
                 type="range"
                 min="0"
-                max="50"
-                step="0.05"
+                max="10"
+                step="0.01"
                 value={currentVolumeAdded}
                 onChange={(e) => {
                   try { sound.playDrop(); } catch (err) { }
@@ -308,15 +308,6 @@ export const AnalysisWorkstation = () => {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => handleAddDrop(5.0)}
-                  className="bg-slate-900 hover:bg-slate-800 active:bg-sky-600/30 text-white p-3 rounded-xl border border-slate-700 font-mono font-bold text-sm transition-all shadow-sm flex flex-col items-center justify-center text-center cursor-pointer hover:border-sky-400"
-                >
-                  <span className="text-sky-400 text-base font-bold">+ 5.0 mL</span>
-                  <span className="text-[10px] text-slate-400 font-sans font-normal mt-0.5">เติมเร็วมาก</span>
-                </button>
-
                 <button
                   type="button"
                   onClick={() => handleAddDrop(1.0)}
@@ -350,6 +341,15 @@ export const AnalysisWorkstation = () => {
                   className="bg-slate-900 hover:bg-slate-800 active:bg-sky-600/30 text-white p-3 rounded-xl border border-slate-700 font-mono font-bold text-sm transition-all shadow-sm flex flex-col items-center justify-center text-center cursor-pointer hover:border-sky-400"
                 >
                   <span className="text-sky-400 text-base font-bold">+ 0.05 mL</span>
+                  <span className="text-[10px] text-slate-400 font-sans font-normal mt-0.5">ทีละนิด</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleAddDrop(0.01)}
+                  className="bg-slate-900 hover:bg-slate-800 active:bg-sky-600/30 text-white p-3 rounded-xl border border-slate-700 font-mono font-bold text-sm transition-all shadow-sm flex flex-col items-center justify-center text-center cursor-pointer hover:border-sky-400"
+                >
+                  <span className="text-sky-400 text-base font-bold">+ 0.01 mL</span>
                   <span className="text-[10px] text-slate-400 font-sans font-normal mt-0.5">ทีละหยด</span>
                 </button>
               </div>

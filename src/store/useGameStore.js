@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CASE_FILE_01, LAB_EQUIPMENT_LIST, BADGES, CASE_TRANSMISSIONS } from '../data/caseData';
-import { CHEMISTRY_CONSTANTS, HINT_SYSTEM_6_LEVELS, PHASE_HINTS_6, TRIALS_DATA } from '../data/chemistryData';
+import { CHEMISTRY_CONSTANTS, HINT_SYSTEM_6_LEVELS, PHASE_HINTS_6, TRIALS_DATA, POST_LAB_QUIZ } from '../data/chemistryData';
 
 export const useGameStore = create(
   persist(
@@ -240,54 +240,78 @@ export const useGameStore = create(
         const { addXp, unlockBadge, isPhase4Complete, trials } = get();
         if (isPhase4Complete) return { success: true, message: "Phase 4 ผ่านแล้ว" };
 
-        const t1 = trials?.[0]?.recordedVol && trials[0].recordedVol > 0 ? trials[0].recordedVol : 24.80;
-        const t2 = trials?.[1]?.recordedVol && trials[1].recordedVol > 0 ? trials[1].recordedVol : 24.85;
-        const t3 = trials?.[2]?.recordedVol && trials[2].recordedVol > 0 ? trials[2].recordedVol : 28.50;
+        const t1 = trials?.[0]?.recordedVol && trials[0].recordedVol > 0 ? parseFloat(trials[0].recordedVol) : 2.82;
+        const t2 = trials?.[1]?.recordedVol && trials[1].recordedVol > 0 ? parseFloat(trials[1].recordedVol) : 2.84;
+        const t3 = trials?.[2]?.recordedVol && trials[2].recordedVol > 0 ? parseFloat(trials[2].recordedVol) : 3.56;
 
-        // Determine true statistical outlier dynamically
-        const maxV = Math.max(t1, t2, t3);
-        const minV = Math.min(t1, t2, t3);
-        const isAllClose = (maxV - minV) <= 0.60;
+        // Calculate pairwise differences
+        const d12 = Math.abs(t1 - t2);
+        const d23 = Math.abs(t2 - t3);
+        const d13 = Math.abs(t1 - t3);
+        const spread = Math.max(t1, t2, t3) - Math.min(t1, t2, t3);
+        const minPairDist = Math.min(d12, d23, d13);
 
+        // Determine true statistical outlier
         let expectedOutlier = 'none';
-        let expectedAvgVol = (t1 + t2 + t3) / 3;
-
-        if (!isAllClose) {
-          const diff3 = Math.abs(t3 - (t1 + t2) / 2);
-          const diff2 = Math.abs(t2 - (t1 + t3) / 2);
-          const diff1 = Math.abs(t1 - (t2 + t3) / 2);
-
-          if (diff3 > 0.8 && diff3 > diff1 && diff3 > diff2) {
-            expectedOutlier = '2';
-            expectedAvgVol = (t1 + t2) / 2;
-          } else if (diff2 > 0.8 && diff2 > diff1 && diff2 > diff3) {
-            expectedOutlier = '1';
-            expectedAvgVol = (t1 + t3) / 2;
-          } else if (diff1 > 0.8 && diff1 > diff2 && diff1 > diff3) {
-            expectedOutlier = '0';
-            expectedAvgVol = (t2 + t3) / 2;
-          }
+        if (spread > 0.25) {
+          if (minPairDist === d12) expectedOutlier = '2'; // t1 & t2 are closest -> t3 is the true outlier
+          else if (minPairDist === d13) expectedOutlier = '1'; // t1 & t3 are closest -> t2 is the true outlier
+          else if (minPairDist === d23) expectedOutlier = '0'; // t2 & t3 are closest -> t1 is the true outlier
         }
 
-        const expectedConc = (0.1000 * expectedAvgVol) / 25.00;
+        // Strict Outlier Check
+        const isOutlierCorrect = String(outlierId) === String(expectedOutlier);
 
-        const isOutlierCorrect = String(outlierId) === String(expectedOutlier) || (expectedOutlier === '2' && String(outlierId) === '2');
+        // Expected average volume strictly from the non-outlier trials
+        let selectedAvgVol = 2.84;
+        if (expectedOutlier === '2') {
+          selectedAvgVol = (t1 + t2) / 2;
+        } else if (expectedOutlier === '0') {
+          selectedAvgVol = (t2 + t3) / 2;
+        } else if (expectedOutlier === '1') {
+          selectedAvgVol = (t1 + t3) / 2;
+        } else {
+          selectedAvgVol = (t1 + t2 + t3) / 3;
+        }
+
         const parsedAvg = parseFloat(avgVol);
         const parsedConc = parseFloat(conc);
         const parsedMass = parseFloat(mass);
 
-        const isAvgCorrect = !isNaN(parsedAvg) && Math.abs(parsedAvg - expectedAvgVol) < 0.25;
-        const isConcCorrect = !isNaN(parsedConc) && Math.abs(parsedConc - expectedConc) < 0.015;
+        // Check Average Volume (allow rounding within 0.08 mL)
+        const isAvgCorrect = !isNaN(parsedAvg) && (
+          Math.abs(parsedAvg - selectedAvgVol) <= 0.08 ||
+          (selectedAvgVol > 0 && Math.abs(parsedAvg - selectedAvgVol) / selectedAvgVol <= 0.03)
+        );
+
+        // Expected concentration from average volume: C1 = (0.1000 * V_avg) / 25.00
+        const refAvg = !isNaN(parsedAvg) ? parsedAvg : selectedAvgVol;
+        const expectedConc = (0.1000 * refAvg) / 25.00;
+
+        // Check concentration C1
+        const isConcCorrect = !isNaN(parsedConc) && (
+          Math.abs(parsedConc - expectedConc) <= 0.0006 ||
+          (expectedConc > 0 && Math.abs(parsedConc - expectedConc) / expectedConc <= 0.05)
+        );
+
+        // Expected mass of Vitamin C in 250 mL
+        const refConc = !isNaN(parsedConc) ? parsedConc : expectedConc;
+        const expectedMassMg250 = refConc * 0.250 * 176.12 * 1000;
+        const expectedMassG250 = refConc * 0.250 * 176.12;
+        const expectedMassMg25 = refConc * 0.025 * 176.12 * 1000;
+
+        // Check Mass (accept mg in 250 mL, g in 250 mL, or mg in 25 mL)
         const isMassCorrect = mass.trim() === '' || (!isNaN(parsedMass) && (
-          (parsedMass >= 300 && parsedMass <= 700) || // if entered in mg (e.g. 496 or 500)
-          (parsedMass >= 0.3 && parsedMass <= 0.7) ||   // if entered in grams (e.g. 0.496 or 0.50)
-          Math.abs(parsedMass - 496) < 100
+          Math.abs(parsedMass - expectedMassMg250) <= 25 ||
+          Math.abs(parsedMass - expectedMassG250) <= 0.03 ||
+          Math.abs(parsedMass - expectedMassMg25) <= 5 ||
+          (expectedMassMg250 > 0 && Math.abs(parsedMass - expectedMassMg250) / expectedMassMg250 <= 0.08)
         ));
 
         if (isOutlierCorrect && isAvgCorrect && isConcCorrect && isMassCorrect) {
           const finalMassStr = mass.trim() 
-            ? (parsedMass > 10 ? (parsedMass/1000).toFixed(3) : parsedMass.toFixed(3)) 
-            : "0.496";
+            ? (parsedMass > 10 ? (parsedMass > 100 ? (parsedMass/1000).toFixed(3) : (parsedMass*10/1000).toFixed(3)) : parsedMass.toFixed(3)) 
+            : (expectedMassG250.toFixed(3) || "0.500");
 
           set({
             outlierTrialId: outlierId,
@@ -301,31 +325,32 @@ export const useGameStore = create(
           unlockBadge('outlier');
           return {
             success: true,
-            message: `ยอดเยี่ยมมาก! วิเคราะห์ Outlier ได้ถูกต้อง (${outlierId === 'none' ? 'ไม่พบ Outlier' : `Trial ${parseInt(outlierId)+1}`}) ปริมาตรเฉลี่ย = ${parsedAvg.toFixed(3)} mL, ความเข้มข้น = ${parsedConc.toFixed(4)} M และมวลวิตามินซี = ${finalMassStr} g (+200 XP)`
+            message: `ยอดเยี่ยมมาก! วิเคราะห์ Outlier ถูกต้อง (${expectedOutlier === 'none' ? 'ไม่พบ Outlier' : `Trial ${parseInt(expectedOutlier)+1}`}) ปริมาตรเฉลี่ย V̄ = ${parsedAvg.toFixed(2)} mL, ความเข้มข้น C₁ = ${parsedConc.toFixed(5)} M และมวลวิตามินซี = ${(parseFloat(finalMassStr)*1000).toFixed(0)} mg (${finalMassStr} g) (+200 XP)`
           };
         } else {
           addXp(-15);
           if (!isOutlierCorrect) {
+            const outlierName = expectedOutlier === 'none' 
+              ? "'ไม่พบ Outlier' (เนื่องจากผลทั้ง 3 ซ้ำใกล้เคียงกัน)" 
+              : `Trial ${parseInt(expectedOutlier)+1} (ปริมาตร ${(expectedOutlier === '0' ? t1 : expectedOutlier === '1' ? t2 : t3).toFixed(2)} mL)`;
             return {
               success: false,
-              message: expectedOutlier === 'none' 
-                ? "การเลือก Outlier ยังไม่ถูกต้อง! ผลการทดลองทั้ง 3 ซ้ำใกล้เคียงกัน จึงควรเลือก 'ไม่พบ Outlier' (-15 XP)"
-                : `การเลือก Outlier ยังไม่ถูกต้อง! โปรดสังเกตค่าที่กระโดดแตกต่างจากกลุ่มอย่างชัดเจน (-15 XP)`
+              message: `การเลือก Outlier ยังไม่ถูกต้อง! สังเกตค่าที่กระโดดแตกต่างจากกลุ่มมากที่สุด ควรเลือก ${outlierName} (-15 XP)`
             };
           } else if (!isAvgCorrect) {
             return {
               success: false,
-              message: `ปริมาตรเฉลี่ยคลาดเคลื่อน! โปรดคำนวณค่าเฉลี่ยจาก Trial ที่น่าเชื่อถือ (${expectedAvgVol.toFixed(3)} mL) (-15 XP)`
+              message: `ปริมาตรเฉลี่ยคลาดเคลื่อน! คำนวณจาก Trial ที่น่าเชื่อถือได้ ${selectedAvgVol.toFixed(2)} mL (-15 XP)`
             };
           } else if (!isConcCorrect) {
             return {
               success: false,
-              message: `ความเข้มข้นกรดคลาดเคลื่อน! จากสูตร C1 = (0.1000 × ปริมาตรเฉลี่ย) / 25.00 (ได้ประมาณ ${expectedConc.toFixed(4)} M) (-15 XP)`
+              message: `ความเข้มข้นกรดคลาดเคลื่อน! จากสูตร C₁ = (0.1000 M × ${refAvg.toFixed(2)} mL) / 25.00 mL = ${expectedConc.toFixed(5)} M (-15 XP)`
             };
           } else {
             return {
               success: false,
-              message: "ปริมาณมวลวิตามินซีคลาดเคลื่อน! คำนวณจากความเข้มข้น C1 ใน 250 mL (ประมาณ 496 mg หรือ 0.496 g) (-15 XP)"
+              message: `ปริมาณมวลวิตามินซีคลาดเคลื่อน! จากสูตร มวล = C₁ × 0.250 L × 176.12 g/mol ได้ ${expectedMassMg250.toFixed(1)} mg (${(expectedMassG250).toFixed(3)} g) (-15 XP)`
             };
           }
         }
@@ -351,21 +376,76 @@ export const useGameStore = create(
           set({
             cerState: { claim, evidence, reasoning },
             isPhase5Complete: true,
-            phase: 5
+            phase: Math.max(get().phase, 5)
           });
           addXp(300);
           unlockBadge('detective');
           return {
             success: true,
-            message: "การยื่นรายงาน CER ปิดคดีสำเร็จสมบูรณ์! คุณได้พิสูจน์แล้วว่า Vitamin Boost มีปริมาณวิตามินซีเพียง 50% ของที่ระบุบนฉลาก (+300 XP)"
+            message: "การยื่นรายงาน CER ปิดคดีสำเร็จสมบูรณ์! ท่านได้พิสูจน์ด้วยหลักฐานเชิงประจักษ์ว่า Vitamin Boost มีปริมาณวิตามินซีจริงเพียง 500 mg (50% ของฉลาก 1,000 mg) ซึ่งเป็นการหลอกลวงผู้บริโภค (+300 XP)"
           };
         } else {
           addXp(-20);
           return {
             success: false,
-            message: "ข้อสรุป CER ยังไม่สมบูรณ์! ข้อกล่าวอ้างและหลักฐานต้องอ้างอิงผลไทเทรต NaOH 0.1000 M และความเข้มข้นจริง C1 = 0.0993 M (-20 XP)"
+            message: "ข้อสรุป CER ยังไม่สมบูรณ์! โปรดเลือก Claim, Evidence และ Reasoning ให้สอดคล้องกัน (-20 XP)"
           };
         }
+      },
+
+      // Phase 6 State (Post-Lab 10-Question Comprehensive Quiz)
+      quizAnswers: {},
+      quizScore: 0,
+      quizTotalQuestions: 10,
+      isPhase6Complete: false,
+      quizSubmitted: false,
+
+      submitQuiz: (answers) => {
+        const { addXp, unlockBadge, isPhase6Complete } = get();
+        let score = 0;
+        
+        POST_LAB_QUIZ.forEach((q) => {
+          const userAns = (answers[q.id] || '').trim();
+          if (q.type === 'mcq') {
+            if (userAns.toLowerCase() === q.correctAnswer.toLowerCase()) {
+              score += 1;
+            }
+          } else {
+            const cleanUserAns = userAns.replace(/[^0-9.]/g, '');
+            const parsedUser = parseFloat(cleanUserAns);
+            const isMatch = q.acceptedAnswers.some(ans => {
+              const cleanAns = ans.replace(/[^0-9.]/g, '');
+              const parsedAns = parseFloat(cleanAns);
+              return userAns.toLowerCase() === ans.toLowerCase() ||
+                     (!isNaN(parsedUser) && !isNaN(parsedAns) && Math.abs(parsedUser - parsedAns) < 0.05);
+            });
+            if (isMatch) {
+              score += 1;
+            }
+          }
+        });
+
+        const earnedXp = score * 30; // 30 XP per question (up to 300 XP)
+        set({
+          quizAnswers: answers,
+          quizScore: score,
+          quizSubmitted: true,
+          isPhase6Complete: true,
+          phase: Math.max(get().phase, 6)
+        });
+
+        addXp(earnedXp);
+        if (score >= 8) {
+          unlockBadge('scholar');
+        }
+
+        return {
+          success: true,
+          score,
+          total: POST_LAB_QUIZ.length,
+          earnedXp,
+          message: `คุณทำแบบทดสอบได้ ${score} / 10 คะแนน (+${earnedXp} XP)`
+        };
       },
 
       // Notebook Entries
@@ -447,6 +527,10 @@ export const useGameStore = create(
         isPhase3Complete: false,
         isPhase4Complete: false,
         isPhase5Complete: false,
+        isPhase6Complete: false,
+        quizAnswers: {},
+        quizScore: 0,
+        quizSubmitted: false,
         outlierTrialId: null,
         avgVolume: '',
         calculatedAscorbicMolarity: '',
@@ -460,7 +544,7 @@ export const useGameStore = create(
       })
     }),
     {
-      name: 'titra-game-storage-v8' // fresh storage version key
+      name: 'titra-game-storage-v10' // fresh storage version key
     }
   )
 );

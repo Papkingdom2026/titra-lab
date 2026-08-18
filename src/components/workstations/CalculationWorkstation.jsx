@@ -39,9 +39,9 @@ export const CalculationWorkstation = () => {
   const feedbackRef = useRef(null);
 
   // Dynamic trial volumes from recorded state or standard defaults
-  const t1Vol = trials?.[0]?.recordedVol && trials[0].recordedVol > 0 ? trials[0].recordedVol : 24.80;
-  const t2Vol = trials?.[1]?.recordedVol && trials[1].recordedVol > 0 ? trials[1].recordedVol : 24.85;
-  const t3Vol = trials?.[2]?.recordedVol && trials[2].recordedVol > 0 ? trials[2].recordedVol : 28.50;
+  const t1Vol = trials?.[0]?.recordedVol && trials[0].recordedVol > 0 ? trials[0].recordedVol : 2.82;
+  const t2Vol = trials?.[1]?.recordedVol && trials[1].recordedVol > 0 ? trials[1].recordedVol : 2.84;
+  const t3Vol = trials?.[2]?.recordedVol && trials[2].recordedVol > 0 ? trials[2].recordedVol : 3.56;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -239,7 +239,7 @@ export const CalculationWorkstation = () => {
             </button>
           </div>
 
-          {/* STEP-BY-STEP METHODOLOGY HELPER (NO SPOILING DIRECT NUMBERS) */}
+          {/* STEP-BY-STEP METHODOLOGY HELPER (CONCEPTUAL & FORMULA GUIDANCE) */}
           {showHelperCalc && (
             <div className="bg-sky-950/40 p-4 md:p-5 rounded-2xl border border-sky-500/40 space-y-3.5 animate-fade-in font-sans">
               <div className="flex items-center justify-between border-b border-sky-800/60 pb-2">
@@ -248,7 +248,7 @@ export const CalculationWorkstation = () => {
                   <span>วิธีทำและสูตรคำนวณ (Forensic Chemical Calculation Guide)</span>
                 </h4>
                 <span className="text-xs text-amber-400 bg-amber-500/15 border border-amber-400/30 px-2.5 py-0.5 rounded-full font-semibold">
-                  คำใบ้แนะนำขั้นตอน
+                  แนวคิดและสูตร
                 </span>
               </div>
 
@@ -256,31 +256,43 @@ export const CalculationWorkstation = () => {
                 <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
                   <span className="font-bold text-amber-300">📌 1. วิธีตรวจหาค่า Outlier:</span>
                   <p className="text-slate-300 leading-relaxed">
-                    เปรียบเทียบปริมาตรทั้ง 3 Trial หากมีค่าใดค่าหนึ่งกระโดดแตกต่างจากอีก 2 ค่าอย่างชัดเจน (เช่น ต่างกันเกิน ±1.0 mL) แสดงว่าเกิดความผิดพลาดในการทดลอง ให้เลือก Trial นั้นเป็น Outlier แต่หากทั้ง 3 ซ้ำใกล้เคียงกัน (ต่างกันไม่เกิน ±0.5 mL) ให้เลือก <b>"ไม่พบ Outlier"</b>
+                    เปรียบเทียบผลการไทเทรตทั้ง 3 Trial หากพบว่ามี Trial ใดที่มีปริมาตรกระโดดแตกต่างจากกลุ่มมากที่สุด (เนื่องจากความผิดพลาดในการทดลอง) ให้เลือก Trial นั้นเป็น Outlier แต่หากทั้ง 3 ซ้ำมีความแม่นยำใกล้เคียงกัน ให้เลือก <b>'ไม่พบ Outlier'</b>
                   </p>
                 </div>
 
                 <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
                   <span className="font-bold text-amber-300">📌 2. วิธีหาปริมาตรเฉลี่ย NaOH (V̄):</span>
                   <p className="text-slate-300 leading-relaxed">
-                    • <b>กรณีพบ Outlier:</b> ตัด Trial ที่ผิดพลาดออก แล้วนำ 2 Trial ที่เหลือมาเฉลี่ย: <span className="font-mono text-sky-300 font-bold">V̄ = (V₁ + V₂) / 2</span><br />
-                    • <b>กรณีไม่พบ Outlier:</b> นำทั้ง 3 Trial มาเฉลี่ย: <span className="font-mono text-sky-300 font-bold">V̄ = (V₁ + V₂ + V₃) / 3</span>
+                    ตัด Trial ที่ระบุว่าเป็น Outlier ออก จากนั้นนำเฉพาะ Trial ที่น่าเชื่อถือที่เหลือมาบวกกันแล้วหารด้วยจำนวนครั้ง:
+                    <span className="font-mono text-sky-300 font-bold block mt-1">
+                      V̄ = (ผลรวมปริมาตรของ Trial ที่ผ่านการคัดเลือก) / (จำนวน Trial ที่นำมาคิด)
+                    </span>
                   </p>
                 </div>
 
                 <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
                   <span className="font-bold text-amber-300">📌 3. วิธีคำนวณความเข้มข้นกรด (C₁ หรือ M_Acid):</span>
                   <p className="text-slate-300 leading-relaxed">
-                    จากสูตรปฏิกิริยาสะเทิน <span className="font-mono text-sky-300 font-bold">C₁V₁ = C₂V₂</span><br />
-                    แทนค่า: <span className="font-mono text-sky-300 font-bold">C₁ = (C₂ × V̄) / V_sample = ({calculatedNaohMolarity || "0.1000"} M × V̄) / 25.00 mL</span>
+                    จากสมการปฏิกิริยาสะเทิน 1:1 ระหว่างกรด-เบส:
+                    <span className="font-mono text-sky-300 font-bold block mt-1">
+                      C₁V₁ = C₂V₂ ➔ C₁ = (C_NaOH × V̄_NaOH) / V_sample
+                    </span>
+                    <span className="text-slate-400 block text-[11px] mt-0.5">
+                      (เมื่อ C_NaOH = 0.1000 M, V_sample = 25.00 mL และ V̄_NaOH คือปริมาตรเฉลี่ยที่ได้จากข้อ 2)
+                    </span>
                   </p>
                 </div>
 
                 <div className="p-3 bg-slate-900/90 rounded-xl border border-slate-800 space-y-1">
                   <span className="font-bold text-amber-300">📌 4. วิธีคำนวณมิลลิกรัมของวิตามินซีในขวด 250 mL:</span>
                   <p className="text-slate-300 leading-relaxed">
-                    จากสูตรหามวล: <span className="font-mono text-sky-300 font-bold">มวล (g) = C₁ × V_total(0.250 L) × MW(176.12 g/mol)</span><br />
-                    แปลงเป็นมิลลิกรัม: <span className="font-mono text-sky-300 font-bold">มวล (mg) = มวล (g) × 1000</span> (หรือประมาณ <span className="font-mono text-emerald-300 font-bold">496 mg</span> หรือ <span className="font-mono text-emerald-300 font-bold">0.496 g</span> เมื่อ C₁ ≈ 0.0993 M)
+                    จากสูตรความสัมพันธ์ของมวล:
+                    <span className="font-mono text-sky-300 font-bold block mt-1">
+                      มวล (mg) = C₁ (mol/L) × ปริมาตรขวด (0.250 L) × มวลโมเลกุล (176.12 g/mol) × 1000
+                    </span>
+                    <span className="text-slate-400 block text-[11px] mt-0.5">
+                      (หมายเหตุ: หากตอบเป็นกรัม (g) ให้ใช้สูตร มวล (g) = C₁ × 0.250 L × 176.12 g/mol)
+                    </span>
                   </p>
                 </div>
               </div>
@@ -309,12 +321,12 @@ export const CalculationWorkstation = () => {
                 disabled={isPhase4Complete}
                 value={selectedOutlier}
                 onChange={(e) => setSelectedOutlier(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-3 text-sm md:text-base text-white focus:outline-none focus:border-sky-400 font-sans disabled:opacity-80"
+                className="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-3 text-sm md:text-base text-white focus:outline-none focus:border-sky-400 font-sans disabled:opacity-80 cursor-pointer"
               >
                 <option value="">-- โปรดเลือกการทดลองที่เป็น Outlier หรือระบุว่าไม่พบ --</option>
-                <option value="0">Trial 1 (ปริมาตร {t1Vol.toFixed(2)} mL)</option>
-                <option value="1">Trial 2 (ปริมาตร {t2Vol.toFixed(2)} mL)</option>
-                <option value="2">Trial 3 (ปริมาตร {t3Vol.toFixed(2)} mL)</option>
+                <option value="0">Trial 1 (ปริมาตร {parseFloat(t1Vol).toFixed(2)} mL)</option>
+                <option value="1">Trial 2 (ปริมาตร {parseFloat(t2Vol).toFixed(2)} mL)</option>
+                <option value="2">Trial 3 (ปริมาตร {parseFloat(t3Vol).toFixed(2)} mL)</option>
                 <option value="none">ไม่พบ Outlier (ผลการทดลองทั้ง 3 ซ้ำมีความแม่นยำใกล้เคียงกัน)</option>
               </select>
             </div>
@@ -328,10 +340,10 @@ export const CalculationWorkstation = () => {
                 <input
                   disabled={isPhase4Complete}
                   type="number"
-                  step="0.001"
+                  step="0.01"
                   value={avgVolInput}
                   onChange={(e) => setAvgVolInput(e.target.value)}
-                  placeholder="กรอกปริมาตรเฉลี่ย เช่น 24.825"
+                  placeholder="กรอกปริมาตรเฉลี่ยที่คำนวณได้..."
                   className="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-4 pr-16 py-3 text-base text-white focus:outline-none focus:border-sky-400 font-mono disabled:opacity-80"
                 />
                 <span className="absolute right-4 text-xs font-mono font-bold text-sky-400 bg-slate-800 px-2.5 py-1 rounded border border-slate-700 pointer-events-none">
@@ -339,7 +351,7 @@ export const CalculationWorkstation = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-normal">
-                คำนวณจากค่าเฉลี่ยของ Trial ที่ตัด Outlier ออกแล้ว หรือเฉลี่ยทั้ง 3 Trial หากไม่มี Outlier
+                💡 คำแนะนำ: นำเฉพาะปริมาตรของ Trial ที่ผ่านการคัดเลือก (ตัด Outlier ออกแล้ว) มาหาค่าเฉลี่ยทางคณิตศาสตร์
               </p>
             </div>
 
@@ -352,10 +364,10 @@ export const CalculationWorkstation = () => {
                 <input
                   disabled={isPhase4Complete}
                   type="number"
-                  step="0.0001"
+                  step="0.00001"
                   value={concInput}
                   onChange={(e) => setConcInput(e.target.value)}
-                  placeholder="กรอกความเข้มข้นกรด เช่น 0.0993"
+                  placeholder="กรอกความเข้มข้นกรด (mol/L)..."
                   className="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-4 pr-16 py-3 text-base text-white focus:outline-none focus:border-sky-400 font-mono disabled:opacity-80"
                 />
                 <span className="absolute right-4 text-xs font-mono font-bold text-sky-400 bg-slate-800 px-2.5 py-1 rounded border border-slate-700 pointer-events-none">
@@ -363,11 +375,13 @@ export const CalculationWorkstation = () => {
                 </span>
               </div>
               <div className="bg-slate-900/90 p-3 rounded-xl border border-slate-800 text-xs md:text-sm font-mono text-slate-300">
-                <span>C₁V₁ = C₂V₂ ➔ C₁ × 25.00 mL = {calculatedNaohMolarity || "0.1000"} M × {avgVolInput || "24.825"} mL</span>
+                <span>
+                  💡 จากสูตร: C₁V₁ = C₂V₂ ➔ C₁ = (C₂ × V₂) / V₁ (เมื่อ C₂ = {calculatedNaohMolarity || "0.1000"} M, V₁ = 25.00 mL)
+                </span>
               </div>
             </div>
 
-            {/* Step 4: NEW FIELD - Calculate Milligrams of Vitamin C */}
+            {/* Step 4: Calculate Milligrams of Vitamin C */}
             <div className="space-y-1.5">
               <label className="block text-sm font-semibold text-sky-400">
                 4. คำนวณปริมาณวิตามินซีในเครื่องดื่มขวดตัวอย่าง 250 mL (มิลลิกรัม : mg):
@@ -379,7 +393,7 @@ export const CalculationWorkstation = () => {
                   step="0.01"
                   value={massInput}
                   onChange={(e) => setMassInput(e.target.value)}
-                  placeholder="กรอกปริมาณมิลลิกรัม เช่น 496 (หรือ 0.496 g)"
+                  placeholder="กรอกปริมาณมวลวิตามินซี (mg หรือ g)..."
                   className="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-4 pr-16 py-3 text-base text-white focus:outline-none focus:border-sky-400 font-mono disabled:opacity-80"
                 />
                 <span className="absolute right-4 text-xs font-mono font-bold text-amber-400 bg-slate-800 px-2.5 py-1 rounded border border-slate-700 pointer-events-none">
@@ -387,7 +401,7 @@ export const CalculationWorkstation = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-400 font-normal">
-                คำนวณจาก มวล (mg) = C₁ × 0.250 L × 176.12 g/mol × 1000 (ฉลากระบุ 1,000 mg)
+                💡 จากสูตร: มวล (mg) = C₁ × ปริมาตรขวด (0.250 L) × มวลโมเลกุล AsA (176.12 g/mol) × 1000
               </p>
             </div>
 

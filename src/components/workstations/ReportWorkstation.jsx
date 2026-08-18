@@ -36,10 +36,10 @@ export const ReportWorkstation = () => {
   const feedbackRef = useRef(null);
 
   // Dynamic values pulled from Phase 4 calculations
-  const acidMolarityDisplay = calculatedAscorbicMolarity || "0.0993";
+  const acidMolarityDisplay = calculatedAscorbicMolarity || "0.01136";
   const acidMassDisplay = calculatedAscorbicMass 
     ? (parseFloat(calculatedAscorbicMass) > 10 ? (parseFloat(calculatedAscorbicMass)/1000).toFixed(3) : parseFloat(calculatedAscorbicMass).toFixed(3))
-    : "0.496";
+    : "0.500";
 
   const toggleEvidenceChoice = (id) => {
     if (isPhase5Complete) return; // locked if completed
@@ -109,13 +109,13 @@ export const ReportWorkstation = () => {
     setSelectedReasoning('r1');
     setFeedback({
       success: true,
-      message: "✨ ผู้ช่วยได้จัดเตรียมข้อสรุป CER ที่ถูกต้องให้แล้ว (-15 XP) กดยื่นรายงานเพื่อปิดคดีและรับเกียรติบัตรทันที!"
+      message: "✨ ผู้ช่วยได้จัดเตรียมข้อสรุป CER ที่ถูกต้องให้แล้ว (-15 XP) กดยื่นรายงานเพื่อผ่านด่านทันที!"
     });
   };
 
-  const handleGoToCertificate = () => {
+  const handleGoToQuiz = () => {
     sound.playPhaseUnlock();
-    triggerPhaseTransition(5, 'certificate', 'CONFERMENT In Progress... Forensic Certificate of Excellence Unlocked');
+    triggerPhaseTransition(6, 'quiz', 'CASE PHASE 6 : Post-Lab Assessment (แบบทดสอบท้ายบทเรียน 10 ข้อ)');
   };
 
   return (
@@ -151,7 +151,7 @@ export const ReportWorkstation = () => {
         text="ถึงเวลาที่คุณจะทำหน้าที่ในฐานะนักวิเคราะห์เคมีอย่างสมบูรณ์แล้ว! ข้อสรุปของคดีนี้จะตั้งอยู่บนหลักฐาน ไม่ใช่การคาดเดา ขอให้คุณนำเสนอรายงาน CER เพื่อตัดสินว่าผลิตภัณฑ์ Vitamin Boost ผ่านมาตรฐานหรือไม่!"
       />
 
-      {/* Prominent Certificate Navigation Callout if CER Completed */}
+      {/* Prominent Quiz Navigation Callout if CER Completed */}
       {isPhase5Complete && (
         <div className="card-success p-6 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in shadow-2xl border-2 border-emerald-400/60">
           <div className="space-y-1">
@@ -160,15 +160,15 @@ export const ReportWorkstation = () => {
               <span>🎉 รายงาน CER ได้รับการอนุมัติและปิดคดีเรียบร้อยแล้ว!</span>
             </h4>
             <p className="text-sm text-slate-200">
-              ท่านสามารถคลิกปุ่มด้านขวาเพื่อเข้าสู่หน้า <b>"เกียรติบัตร (Certificate)"</b> เพื่อดูผลคะแนนดาว ⭐⭐⭐⭐⭐ และดาวน์โหลดใบประกาศได้ทันที
+              ท่านสามารถคลิกปุ่มด้านขวาเพื่อเข้าสู่ <b>"Phase 6: แบบทดสอบท้ายบทเรียน (10 ข้อ)"</b> เพื่อยืนยันองค์ความรู้และรับเกียรติบัตร
             </p>
           </div>
           <button
-            onClick={handleGoToCertificate}
+            onClick={handleGoToQuiz}
             className="btn-primary text-white font-bold px-8 py-4 rounded-2xl flex items-center justify-center gap-2.5 text-base shadow-xl shrink-0 whitespace-nowrap cursor-pointer"
           >
-            <Award className="w-5 h-5 text-amber-300" />
-            <span>เข้าสู่หน้าเกียรติบัตร (Certificate)</span>
+            <BookOpen className="w-5 h-5 text-amber-300" />
+            <span>เข้าสู่หน้าแบบทดสอบ (Quiz 10 ข้อ)</span>
             <ArrowRight className="w-5 h-5" />
           </button>
         </div>
@@ -250,9 +250,12 @@ export const ReportWorkstation = () => {
               {CER_OPTIONS.evidences.map((e) => {
                 const isSelected = selectedEvidence.includes(e.id);
                 // Dynamically inject values from previous phase
-                const displayText = e.id === 'e2'
-                  ? `คำนวณความเข้มข้นวิตามินซีได้ C1 = ${acidMolarityDisplay} M ซึ่งคิดเป็น ${acidMassDisplay} g ต่อ 250 mL (ฉลากระบุ 1.000 g)`
-                  : e.text;
+                let displayText = e.text;
+                if (e.id === 'e2') {
+                  const massG = parseFloat(acidMassDisplay) > 10 ? (parseFloat(acidMassDisplay)/1000).toFixed(3) : parseFloat(acidMassDisplay).toFixed(3);
+                  const massMg = (parseFloat(massG) * 1000).toFixed(0);
+                  displayText = `คำนวณความเข้มข้นวิตามินซีได้ C1 = ${acidMolarityDisplay} M ซึ่งคิดเป็น ${massMg} mg (${massG} g) ต่อ 250 mL (ในขณะที่ฉลากระบุ 1,000 mg)`;
+                }
 
                 return (
                   <div
@@ -319,18 +322,18 @@ export const ReportWorkstation = () => {
                 className="w-full sm:w-auto btn-primary text-white font-bold px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 text-base shadow-lg cursor-pointer"
               >
                 <ShieldCheck className="w-5 h-5" />
-                <span>ยื่นรายงาน CER ปิดคดีประวัติศาสตร์</span>
+                <span>ยื่นรายงาน CER สรุปผลการสืบสวน</span>
               </button>
             </div>
           ) : (
             <div className="pt-3 flex justify-end">
               <button
                 type="button"
-                onClick={handleGoToCertificate}
-                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 text-base shadow-lg cursor-pointer"
+                onClick={handleGoToQuiz}
+                className="w-full sm:w-auto bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 text-base shadow-lg cursor-pointer animate-pulse"
               >
-                <Award className="w-5 h-5 text-amber-300" />
-                <span>ไปที่หน้าเกียรติบัตร (Certificate)</span>
+                <BookOpen className="w-5 h-5 text-amber-300" />
+                <span>ไปทำแบบทดสอบท้ายบทเรียน (10 ข้อ)</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
             </div>

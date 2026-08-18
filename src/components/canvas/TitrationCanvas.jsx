@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 
 export const TitrationCanvas = ({ 
   currentVolume = 0, 
-  targetEndpoint = 24.80, 
+  targetEndpoint = 2.84, 
   isStirring = true,
   isDropping = false 
 }) => {
@@ -17,19 +17,19 @@ export const TitrationCanvas = ({
     let r = 240, g = 240, b = 250, a = 0.35; // Default colorless
     let colorName = "ไม่มีสี (Colorless)";
 
-    if (diff < -0.3) {
-      // Acidic region
+    if (diff < -0.10) {
+      // Acidic region (Colorless)
       ph = 1.0 + Math.max(0, (vol / target) * 3.5);
       r = 240; g = 245; b = 255; a = 0.35;
       colorName = "ไม่มีสี (pH < 8.2)";
-    } else if (diff >= -0.3 && diff <= 0.2) {
-      // Equivalence Point Region (Faint Pink!)
-      ph = 8.2 + ((diff + 0.3) / 0.5) * 1.8;
+    } else if (diff >= -0.10 && diff <= 0.10) {
+      // Equivalence Point Region (Faint Pink - Perfect Endpoint!)
+      ph = 8.2 + ((diff + 0.10) / 0.20) * 1.8;
       r = 255; g = 182; b = 193; a = 0.75;
       colorName = "สีชมพูระเรื่อ (Faint Pink - จุดยุติสมบูรณ์!)";
     } else {
       // Over-titrated (Deep Pink / Magenta)
-      ph = 10.0 + Math.min(3.5, diff * 0.8);
+      ph = 10.0 + Math.min(3.5, diff * 1.2);
       r = 236; g = 72; b = 153; a = 0.95;
       colorName = "สีชมพูเข้ม/บานเย็น (Over-titrated หยดเกิน)";
     }
@@ -75,7 +75,7 @@ export const TitrationCanvas = ({
       buretteGrad.addColorStop(1, 'rgba(255,255,255,0.5)');
 
       // Titrant Liquid inside Burette (NaOH)
-      const maxBuretteVol = 50.0;
+      const maxBuretteVol = 10.0;
       const remainingVol = Math.max(0, maxBuretteVol - currentVolume);
       const liquidFillHeight = (remainingVol / maxBuretteVol) * (buretteH - 20);
       const liquidTopY = (buretteTop + buretteH - 10) - liquidFillHeight;
@@ -95,11 +95,11 @@ export const TitrationCanvas = ({
       ctx.lineWidth = 2;
       ctx.strokeRect(buretteX, buretteTop, buretteW, buretteH);
 
-      // Ticks & Labels on Burette
+      // Ticks & Labels on Burette (0 to 10 mL Scale)
       ctx.fillStyle = '#94A3B8';
       ctx.font = '10px monospace';
-      for (let i = 0; i <= 50; i += 10) {
-        const tickY = buretteTop + (i / 50) * (buretteH - 20) + 10;
+      for (let i = 0; i <= 10; i += 2) {
+        const tickY = buretteTop + (i / 10) * (buretteH - 20) + 10;
         ctx.beginPath();
         ctx.moveTo(buretteX + buretteW, tickY);
         ctx.lineTo(buretteX + buretteW - 8, tickY);

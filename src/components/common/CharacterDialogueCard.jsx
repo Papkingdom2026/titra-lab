@@ -2,8 +2,9 @@ import React from 'react';
 import { CHARACTERS } from '../../data/caseData';
 import { MessageSquare, User } from 'lucide-react';
 
-export const CharacterDialogueCard = ({ characterId, text, title = null }) => {
+export const CharacterDialogueCard = ({ characterId, text, dialogue, title = null, children }) => {
   const char = CHARACTERS[characterId] || CHARACTERS.maya;
+  const content = text || dialogue || children || '';
 
   // Character Avatars mapping
   const avatarIcons = {
@@ -50,7 +51,7 @@ export const CharacterDialogueCard = ({ characterId, text, title = null }) => {
             </div>
           )}
           <p className="text-sm md:text-base leading-relaxed text-slate-200 font-normal">
-            "{text}"
+            "{content}"
           </p>
         </div>
 

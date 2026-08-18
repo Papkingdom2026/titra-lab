@@ -7,6 +7,7 @@ import { EvidenceWorkstation } from './components/workstations/EvidenceWorkstati
 import { AnalysisWorkstation } from './components/workstations/AnalysisWorkstation';
 import { CalculationWorkstation } from './components/workstations/CalculationWorkstation';
 import { ReportWorkstation } from './components/workstations/ReportWorkstation';
+import { QuizWorkstation } from './components/workstations/QuizWorkstation';
 import { CertificateWorkstation } from './components/workstations/CertificateWorkstation';
 import { NotebookWorkstation } from './components/workstations/NotebookWorkstation';
 import { UserManualPage } from './components/workstations/UserManualPage';
@@ -57,6 +58,8 @@ export function App() {
         return <CalculationWorkstation />;
       case 'report':
         return <ReportWorkstation />;
+      case 'quiz':
+        return <QuizWorkstation />;
       case 'certificate':
         return <CertificateWorkstation />;
       case 'notebook':

@@ -12,7 +12,8 @@ import {
   Sparkles,
   ChevronRight,
   Award,
-  FileText
+  FileText,
+  GraduationCap
 } from 'lucide-react';
 
 export const WorkstationSidebar = () => {
@@ -21,7 +22,8 @@ export const WorkstationSidebar = () => {
     activeWorkstation, 
     setActiveWorkstation,
     notebookEntries,
-    isPhase5Complete
+    isPhase5Complete,
+    isPhase6Complete
   } = useGameStore();
 
   const handleNavClick = (wsId, isUnlocked) => {
@@ -75,20 +77,28 @@ export const WorkstationSidebar = () => {
       minPhase: 5
     },
     {
+      id: 'quiz',
+      stepNum: '6',
+      title: 'แบบทดสอบ (Quiz)',
+      subtitle: 'แบบทดสอบ 10 ข้อท้ายบท',
+      icon: GraduationCap,
+      minPhase: 6
+    },
+    {
       id: 'certificate',
       stepNum: '🏆',
       title: 'เกียรติบัตร (Certificate)',
       subtitle: 'รับใบประกาศ & สรุปดาว ⭐',
       icon: Award,
       isSpecial: true,
-      unlocked: isPhase5Complete
+      unlocked: isPhase5Complete || isPhase6Complete
     }
   ];
 
   return (
     <aside className="w-full lg:w-72 xl:w-80 shrink-0 space-y-4 font-sans no-print">
       
-      {/* 5-Phase + Certificate Navigation Stack */}
+      {/* 6-Phase + Certificate Navigation Stack */}
       <div className="glass-card rounded-2xl p-3 md:p-4 space-y-2 border border-slate-700/60 shadow-lg">
         <div className="flex items-center justify-between px-2 pt-1 pb-2 border-b border-slate-800">
           <span className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -96,7 +106,7 @@ export const WorkstationSidebar = () => {
             <span>เวิร์กสเตชันการสืบสวน</span>
           </span>
           <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono">
-            {isPhase5Complete ? 'ปิดคดีสมบูรณ์' : `เฟส ${phase}/5`}
+            {isPhase6Complete ? 'สำเร็จ 100%' : `เฟส ${phase}/6`}
           </span>
         </div>
 

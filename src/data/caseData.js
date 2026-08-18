@@ -185,5 +185,6 @@ export const BADGES = [
   { id: 'precision', name: 'Precision Master', desc: 'ผ่านการปรับมาตรฐานสาร NaOH ใน Case Phase 2', icon: '📏', minPhase: 2 },
   { id: 'analyst', name: 'Precision Analyst', desc: 'อ่านค่าบิวเรตต์และไทเทรตสำเร็จใน Case Phase 3', icon: '🎯', minPhase: 3 },
   { id: 'outlier', name: 'Critical Thinker', desc: 'ตรวจจับและแยกค่า Outlier ได้ถูกต้องใน Case Phase 4', icon: '🧠', minPhase: 4 },
-  { id: 'detective', name: 'Chief Investigator', desc: 'เขียนรายงาน CER ปิดคดี Vitamin Boost ได้สมบูรณ์', icon: '🏆', minPhase: 5 }
+  { id: 'detective', name: 'Chief Investigator', desc: 'เขียนรายงาน CER ปิดคดี Vitamin Boost ได้สมบูรณ์', icon: '🏆', minPhase: 5 },
+  { id: 'scholar', name: 'Forensic Scholar', desc: 'ทำแบบทดสอบท้ายบทเรียน 10 ข้อได้คะแนนยอดเยี่ยม', icon: '🎓', minPhase: 6 }
 ];

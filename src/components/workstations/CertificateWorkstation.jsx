@@ -18,56 +18,63 @@ import {
 } from 'lucide-react';
 
 export const CertificateWorkstation = () => {
-  const { studentInfo, xp, unlockedBadges, isPhase5Complete, resetGame } = useGameStore();
+  const { studentInfo, xp, unlockedBadges, isPhase5Complete, quizScore, quizSubmitted, resetGame } = useGameStore();
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const certRef = useRef(null);
 
-  // 5-Star Dynamic Performance Rating based on XP & Accuracy
+  // 5-Star Dynamic Performance Rating based on Total XP & Quiz Score
   const getPerformanceRating = () => {
-    if (xp >= 900) {
+    const qScore = quizScore !== undefined && quizScore !== null ? Number(quizScore) : 0;
+
+    // 5 Stars: High XP (>= 1150) AND Excellent Quiz (>= 9/10)
+    if (xp >= 1100 && qScore >= 9) {
       return {
         stars: 5,
         title: 'ระดับยอดเยี่ยม 5 ดาว: หัวหน้านักวิเคราะห์นิติเคมีเกียรตินิยมเหรียญทอง (Master Forensic Expert)',
-        subtext: 'ปฏิบัติภารกิจได้อย่างแม่นยำสูงสุด ไร้ข้อผิดพลาดทางข้อมูล มีความซื่อสัตย์ต่อหลักฐาน สมควรได้รับเกียรตินิยมเหรียญทอง',
+        subtext: 'ปฏิบัติภารกิจได้อย่างแม่นยำสูงสุด ทำแบบทดสอบท้ายบทเรียนได้ยอดเยี่ยม (9–10/10 ข้อ) มีความซื่อสัตย์ต่อหลักฐาน สมควรได้รับเกียรตินิยมเหรียญทอง',
         color: 'text-amber-400',
         starClass: 'text-amber-400 fill-amber-400',
         tierName: '5-Star Gold Honor'
       };
     }
-    if (xp >= 750) {
+    // 4 Stars: Good XP (>= 950) AND Good Quiz (>= 7/10)
+    if (xp >= 950 && qScore >= 7) {
       return {
         stars: 4,
         title: 'ระดับดีเด่น 4 ดาว: นักวิเคราะห์เคมีชำนาญการพิเศษ (Senior Forensic Analyst)',
-        subtext: 'ปฏิบัติภารกิจได้ถูกต้องตามมาตรฐานวิชาชีพ มีความรอบคอบและวิเคราะห์ข้อมูลได้อย่างดีเยี่ยม',
+        subtext: 'ปฏิบัติภารกิจได้ถูกต้องตามมาตรฐานวิชาชีพ ทำแบบทดสอบได้ในเกณฑ์ดีเด่น (7–8/10 ข้อ) และวิเคราะห์ข้อมูลได้อย่างรอบคอบ',
         color: 'text-sky-300',
         starClass: 'text-amber-400 fill-amber-400',
         tierName: '4-Star Silver Honor'
       };
     }
-    if (xp >= 600) {
+    // 3 Stars: Moderate XP (>= 750) AND Passing Quiz (>= 5/10)
+    if (xp >= 750 && qScore >= 5) {
       return {
         stars: 3,
         title: 'ระดับดี 3 ดาว: เจ้าหน้าที่นิติเคมีชำนาญการ (Professional Chemical Investigator)',
-        subtext: 'ปฏิบัติการทดลองและคำนวณผ่านเกณฑ์มาตรฐาน สามารถสรุปรายงานปิดคดีได้อย่างถูกต้อง',
+        subtext: 'ปฏิบัติการทดลอง คำนวณ และทำแบบทดสอบผ่านเกณฑ์มาตรฐาน (5–6/10 ข้อ) สามารถสรุปรายงานปิดคดีได้อย่างถูกต้อง',
         color: 'text-emerald-300',
         starClass: 'text-amber-400 fill-amber-400',
         tierName: '3-Star Bronze Honor'
       };
     }
-    if (xp >= 450) {
+    // 2 Stars: Basic XP (>= 500) OR Quiz (>= 3/10)
+    if (xp >= 500 && qScore >= 3) {
       return {
         stars: 2,
         title: 'ระดับผ่านเกณฑ์ 2 ดาว: ผู้ช่วยนักวิเคราะห์นิติเคมี (Assistant Forensic Analyst)',
-        subtext: 'ผ่านการทดสอบตามเกณฑ์พื้นฐาน มีการใช้ตัวช่วยและปรับปรุงแก้ไขจนสำเร็จภารกิจ',
+        subtext: 'ผ่านการทดสอบตามเกณฑ์พื้นฐาน (3–4/10 ข้อ) มีการใช้ตัวช่วยและปรับปรุงแก้ไขจนสำเร็จภารกิจ',
         color: 'text-slate-300',
         starClass: 'text-amber-400 fill-amber-400',
         tierName: '2-Star Standard Pass'
       };
     }
+    // 1 Star: Trainee (< 3/10 or low XP)
     return {
       stars: 1,
       title: 'ระดับฝึกหัด 1 ดาว: นักวิเคราะห์เคมีฝึกหัด (Trainee Forensic Analyst)',
-      subtext: 'สำเร็จการสืบสวนคดีขั้นต้น ควรทบทวนทักษะการคำนวณและการทดลองเพิ่มเติม',
+      subtext: 'สำเร็จการสืบสวนคดีขั้นต้น ควรทบทวนทักษะการคำนวณ การทดลอง และศึกษาคำอธิบายเฉลยในแบบทดสอบเพิ่มเติม',
       color: 'text-slate-400',
       starClass: 'text-amber-400 fill-amber-400',
       tierName: '1-Star Trainee'
@@ -148,7 +155,7 @@ export const CertificateWorkstation = () => {
           </p>
 
           <div class="rating-box">
-            ผลการประเมิน: ${starsHtml} (${rating.title}) • คะแนนรวม ${xp} XP
+            ผลการประเมิน: ${starsHtml} (${rating.title}) • แบบทดสอบ ${quizScore || 0}/10 • คะแนนรวม ${xp} XP
           </div>
 
           <div class="badge-row">
@@ -251,7 +258,7 @@ export const CertificateWorkstation = () => {
     ctx.fillStyle = '#B45309';
     ctx.font = 'bold 24px "IBM Plex Sans Thai", sans-serif';
     const starsText = '⭐'.repeat(rating.stars);
-    ctx.fillText(`ผลการประเมิน: ${starsText} (${rating.title}) • คะแนนสะสม ${xp} XP`, 800, 690);
+    ctx.fillText(`ผลการประเมิน: ${starsText} (${rating.title}) • แบบทดสอบ ${quizScore || 0}/10 • ${xp} XP`, 800, 690);
 
     // Signatures
     ctx.strokeStyle = '#94A3B8';
@@ -349,9 +356,13 @@ export const CertificateWorkstation = () => {
             <Flame className="w-5 h-5 text-amber-400" />
             <span>คะแนน XP สะสม: {xp} XP</span>
           </div>
+          <div className="bg-slate-900 px-5 py-2.5 rounded-2xl border border-slate-700 text-emerald-300 font-mono font-bold text-base flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-emerald-400" />
+            <span>แบบทดสอบท้ายบทเรียน: {quizScore || 0} / 10 ข้อ (+{(quizScore || 0) * 30} XP)</span>
+          </div>
           <div className="bg-slate-900 px-5 py-2.5 rounded-2xl border border-slate-700 text-sky-300 font-mono font-bold text-base flex items-center gap-2">
             <BadgeCheck className="w-5 h-5 text-sky-400" />
-            <span>เหรียญเกียรติยศ: {unlockedBadges.length} / 5 Badges</span>
+            <span>เหรียญเกียรติยศ: {unlockedBadges.length} / 6 Badges</span>
           </div>
         </div>
       </div>
